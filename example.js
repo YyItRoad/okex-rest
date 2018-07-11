@@ -1,8 +1,10 @@
 var OKEX = require('./rest');
 
 // Test public data APIs
-var publicClient = new OKEX();
+//var publicClient = new OKEX();
 
+
+//publicClient.getFutureTicker(logResponse,'btc_usd');
 // get BTCCNY ticker
 //publicClient.getTicker(logResponse, 'ltc_btc');
 
@@ -24,9 +26,18 @@ var publicClient = new OKEX();
 // Or enter them below.
 // WARNING never commit your API keys into a public repository.
 var key = 'key';
-var secret = 'secret key';
+var secret = 'secret';
 
-var privateClient = new OKEX(key, secret);
+// var privateClient = new OKEX(key, secret);
+// privateClient.getFutureUserInfo(logResponse,'ltc_usd');
+
+//获取用户信息-逐仓
+// privateClient.getFutureUserInfoFix(logResponse);
+//获取持仓信息-逐仓
+// privateClient.getFuturePositionFix(logResponse,'ltc_usd');
+
+// privateClient.getFutureKline(logResponse,'btc_usd','30min');
+
 
 // uncomment the API you want to test.
 // Be sure to check the parameters so you don't do any unwanted live trades
@@ -39,7 +50,7 @@ var privateClient = new OKEX(key, secret);
 
 // market orders
 // market buy
-privateClient.addTrade(logResponse, 'iota_btc', 'buy_market', null ,'0.00021291');
+//privateClient.addTrade(logResponse, 'iota_btc', 'buy_market', null ,'0.00021291');
 // market sell of 0.01 BTC
 //privateClient.addTrade(logResponse, 'btc_cny', 'sell_market', '0.01');
 
@@ -76,7 +87,7 @@ function logResponse(err, data)
     if (err)
     {
         console.log('error name %s', err.name);
-        console.log('error message %s', err);
+        console.log('error message %s', err.info);
     }
 
     console.log('\ndata: %s', JSON.stringify(data));

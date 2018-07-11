@@ -6,25 +6,27 @@ const VError = require('verror');
 const md5 = require('md5');
 
 var OKEX = function (api_key, secret, server, timeout) {
-  this.api_key = api_key;
-  this.secret = secret;
-  this.server = server || 'https://www.okex.com';
-  this.timeout = timeout || 20000;
+    this.api_key = api_key;
+    this.secret = secret;
+    this.server = server || 'https://www.okex.com';
+    this.timeout = timeout || 20000;
 };
 
-var headers = {"contentType": "application/x-www-form-urlencoded",
-                "User-Agent": "OKEX JavaScript API Wrapper"};
+var headers = {
+    "contentType": "application/x-www-form-urlencoded",
+    "User-Agent": "OKEX JavaScript API Wrapper"
+};
 
-OKEX.prototype.privateRequest = function(method, params, callback) {
+OKEX.prototype.privateRequest = function (method, params, callback) {
     var functionName = 'OKEX.privateRequest()',
         self = this;
 
-    if(!this.api_key || !this.secret) {
+    if (!this.api_key || !this.secret) {
         var error = new VError('%s must provide api_key and secret to make this API request.', functionName);
         return callback(error);
     }
 
-    if(!_.isObject(params)) {
+    if (!_.isObject(params)) {
         var error = new VError('%s second parameter %s must be an object. If no params then pass an empty object {}', functionName, params);
         return callback(error);
     }
@@ -89,10 +91,10 @@ function formatParameters(params) {
 }
 
 
-OKEX.prototype.publicRequest = function(method, params, callback) {
+OKEX.prototype.publicRequest = function (method, params, callback) {
     var functionName = 'OKEX.publicRequest()';
 
-    if(!_.isObject(params)) {
+    if (!_.isObject(params)) {
         var error = new VError('%s second parameter %s must be an object. If no params then pass an empty object {}', functionName, params);
         return callback(error);
     }
@@ -122,11 +124,11 @@ OKEX.prototype.publicRequest = function(method, params, callback) {
 function executeRequest(options, requestDesc, callback) {
     var functionName = 'OKEX.executeRequest()';
 
-    request(options, function(err, response, data) {
+    request(options, function (err, response, data) {
         var error = null,   // default to no errors
             returnObject = data;
 
-        if(err) {
+        if (err) {
             error = new VError(err, '%s failed %s', functionName, requestDesc);
             error.name = err.code;
         }
@@ -139,12 +141,12 @@ function executeRequest(options, requestDesc, callback) {
             try {
                 returnObject = JSON.parse(data);
             }
-            catch(e) {
+            catch (e) {
                 error = new VError(e, 'Could not parse response from server: ' + data);
             }
         }
         // if json request was not able to parse json response into an object
-        else if (options.json && !_.isObject(data) ) {
+        else if (options.json && !_.isObject(data)) {
             error = new VError('%s could not parse response from %s\nResponse: %s', functionName, requestDesc, data);
         }
 
@@ -153,6 +155,7 @@ function executeRequest(options, requestDesc, callback) {
 
             error = new VError('%s %s returned error code %s, message: "%s"', functionName,
                 requestDesc, returnObject.error_code, errorMessage);
+            error.info = errorMessage;
 
             error.name = returnObject.error_code;
         }
@@ -176,8 +179,8 @@ OKEX.prototype.getDepth = function getDepth(callback, symbol, size, merge) {
         merge: 1
     };
 
-    if (!_.isUndefined(size) ) params.size = size;
-    if (!_.isUndefined(merge) ) params.merge = merge;
+    if (!_.isUndefined(size)) params.size = size;
+    if (!_.isUndefined(merge)) params.merge = merge;
 
     this.publicRequest('depth', params, callback);
 };
@@ -336,13 +339,198 @@ function mapErrorMessage(error_code) {
         10042: 'Admin password error',
         10100: 'User account frozen',
         10216: 'Non-available API',
-        503: 'Too many requests (Http)'};
+        20001: '用户不存在',
+        20002: '用户被冻结',
+        20003: '用户被爆仓冻结',
+        20004: '合约账户被冻结',
+        20005: '用户合约账户不存在',
+        20006: '必填参数为空',
+        20007: '参数错误',
+        20008: '合约账户余额为空',
+        20009: '虚拟合约状态错误',
+        20010: '合约风险率信息不存在',
+        20011: '10倍/20倍杠杆开BTC前保证金率低于90%/80%，10倍/20倍杠杆开LTC前保证金率低于80%/60%',
+        20012: '10倍/20倍杠杆开BTC后保证金率低于90%/80%，10倍/20倍杠杆开LTC后保证金率低于80%/60%',
+        20013: '暂无对手价',
+        20014: '系统错误',
+        20015: '订单信息不存在',
+        20016: '平仓数量是否大于同方向可用持仓数量',
+        20017: '非本人操作',
+        20018: '下单价格高于前一分钟的103%或低于97%',
+        20019: '该IP限制不能请求该资源',
+        20020: '密钥不存在',
+        20021: '指数信息不存在',
+        20022: '接口调用错误（全仓模式调用全仓接口，逐仓模式调用逐仓接口）',
+        20023: '逐仓用户',
+        20024: 'sign签名不匹配',
+        20025: '杠杆比率错误',
+        20026: 'API鉴权错误',
+        20027: '无交易记录',
+        20028: '合约不存在',
+        20029: '转出金额大于可转金额',
+        20030: '账户存在借款',
+        20038: '根据相关法律，您所在的国家或地区不能使用该功能。',
+        20049: '用户请求接口过于频繁',
+        20061: '合约相同方向只支持一个杠杆，若有10倍多单，就不能再下20倍多单',
+        21020: '合约交割中，无法下单',
+        21021: '合约清算中，无法下单',
+        503: 'Too many requests (Http)'
+    };
 
     if (!errorCodes[error_code]) {
         return 'Unknown OKEX error code: ' + error_code;
     }
 
-    return( errorCodes[error_code] );
+    return ( errorCodes[error_code] );
 }
+
+/**
+ * 合约交易
+ *
+ * contract_type this_week:当周 next_week:下周 quarter:季度
+ */
+
+function handleContractType(params, contract_type) {
+    params.contract_type = 'quarter';
+    if (contract_type) params.contract_type = contract_type;
+    return params;
+}
+
+//
+// Public Functions
+//
+//1.获取行情
+OKEX.prototype.getFutureTicker = function getFutureTicker(callback, symbol, contract_type) {
+    var params = {symbol: symbol, contract_type: 'quarter'};
+    if (contract_type) params.contract_type = contract_type;
+    this.publicRequest('future_ticker', params, callback);
+};
+
+//2.获取深度
+OKEX.prototype.getFutureDepth = function getFutureDepth(callback, symbol, size, merge, contract_type) {
+    var params = {
+        symbol: symbol,
+        size: 200,
+        merge: 1
+    };
+
+    if (!_.isUndefined(size)) params.size = size;
+    if (!_.isUndefined(merge)) params.merge = merge;
+
+    this.publicRequest('future_depth', handleContractType(params, contract_type), callback);
+};
+
+//3.获取OKEx合约交易记录信息
+OKEX.prototype.getFutureTrades = function getFutureTrades(callback, symbol, contract_type) {
+    var params = {symbol: symbol};
+    this.publicRequest('future_trades', handleContractType(params, contract_type), callback);
+};
+
+//4.获取OKEx合约指数信息
+OKEX.prototype.getFutureIndex = function getFutureIndex(callback, symbol) {
+    var params = {symbol: symbol};
+    this.publicRequest('future_index', params, callback);
+};
+
+//5.获取美元人民币汇率
+OKEX.prototype.getExchangeRate = function getExchangeRate(callback) {
+    this.publicRequest('exchange_rate', {}, callback);
+};
+
+//6.Get /api/v1/future_estimated_price 获取交割预估价
+
+/**
+ * 7.获取OKEx合约K线信息
+ * @param callback
+ * @param symbol
+ * @param type  1min/3min/5min/15min/30min/1day/3day/1week/1hour/2hour/4hour/6hour/12hour
+ * @param contract_type
+ */
+OKEX.prototype.getFutureKline = function getFutureKline(callback, symbol, type, size, since, contract_type) {
+    var params = {symbol: symbol};
+    if (type) params.type = type;
+    if (size) params.size = size;
+    if (since) params.since = since;
+
+    this.publicRequest('future_kline', handleContractType(params, contract_type), callback);
+};
+
+//8.获取当前可用合约总持仓量
+OKEX.prototype.getFutureHoldAmount = function getFutureHoldAmount(callback, symbol, contract_type) {
+    var params = {symbol: symbol};
+    this.publicRequest('future_hold_amount', handleContractType(params, contract_type), callback);
+};
+
+//
+//Private Functions
+//
+//1.获取OKEx合约账户信息(全仓)
+OKEX.prototype.getFutureUserInfo = function getFutureUserInfo(callback) {
+    this.privateRequest('future_userinfo', {}, callback);
+};
+
+//2.获取用户持仓获取OKEX合约账户信息 （全仓）
+OKEX.prototype.getFuturePosition = function getFuturePosition(callback, symbol, contract_type) {
+    var params = {
+        symbol: symbol
+    };
+    this.privateRequest('future_position', handleContractType(params, contract_type), callback);
+};
+
+//3.合约下单
+OKEX.prototype.addFutureTrade = function addFutureTrade(callback, symbol, type, amount, price, match_price, contract_type) {
+    var params = {
+        symbol: symbol,
+        type: type
+    };
+
+    if (amount) params.amount = amount;
+    if (price) params.price = price;
+    if (match_price) params.match_price = match_price;
+
+    this.privateRequest('trade', handleContractType(params, contract_type), callback);
+};
+
+//4.获取OKEX合约交易历史（非个人）访问频率
+
+//5.POST /api/v1/future_batch_trade 批量下单
+
+//6.取消合约订单
+OKEX.prototype.cancelFutureOrder = function cancelFutureOrder(callback, symbol, order_id, contract_type) {
+    var params = {
+        symbol: symbol,
+        order_id: order_id
+    };
+    this.privateRequest('cancel_order', handleContractType(params, contract_type), callback);
+};
+
+//7.获取合约订单信息
+OKEX.prototype.getFutureOrderInfo = function getFutureOrderInfo(callback, symbol, order_id, status, contract_type) {
+    var params = {
+        symbol: symbol,
+        order_id: order_id
+    };
+    if (order_id == '-1') params.status = status;
+    this.privateRequest('future_order_info', handleContractType(params, contract_type), callback);
+};
+
+//8.POST /api/v1/future_orders_info 批量获取合约订单信息
+
+//9.POST /api/v1/future_userinfo_4fix 获取逐仓合约账户信息
+OKEX.prototype.getFutureUserInfoFix = function getFutureUserInfoFix(callback) {
+    this.privateRequest('future_userinfo_4fix', {}, callback);
+};
+
+//10.POST /api/v1/future_position_4fix 逐仓用户持仓查询
+OKEX.prototype.getFuturePositionFix = function getFuturePositionFix(callback, symbol, contract_type) {
+    var params = {
+        symbol: symbol
+    };
+    this.privateRequest('future_position_4fix', handleContractType(params, contract_type), callback);
+};
+
+//11.POST /api/v1/future_explosive 获取合约爆仓单
+
+//12.POST /api/v1/future_devolve 个人账户资金划转
 
 module.exports = OKEX;
