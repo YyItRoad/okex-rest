@@ -515,6 +515,13 @@ OKEX.prototype.getFutureOrderInfo = function getFutureOrderInfo(callback, symbol
 };
 
 //8.POST /api/v1/future_orders_info 批量获取合约订单信息
+OKEX.prototype.getFutureOrdersInfo = function getFutureOrderInfo(callback, symbol, order_id, contract_type) {
+    var params = {
+        symbol: symbol,
+        order_id: order_id
+    };
+    this.privateRequest('future_orders_info', handleContractType(params, contract_type), callback);
+};
 
 //9.POST /api/v1/future_userinfo_4fix 获取逐仓合约账户信息
 OKEX.prototype.getFutureUserInfoFix = function getFutureUserInfoFix(callback) {
