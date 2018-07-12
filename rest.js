@@ -488,7 +488,7 @@ OKEX.prototype.addFutureTrade = function addFutureTrade(callback, symbol, type, 
     if (price) params.price = price;
     if (match_price) params.match_price = match_price;
 
-    this.privateRequest('trade', handleContractType(params, contract_type), callback);
+    this.privateRequest('future_trade', handleContractType(params, contract_type), callback);
 };
 
 //4.获取OKEX合约交易历史（非个人）访问频率
@@ -501,7 +501,7 @@ OKEX.prototype.cancelFutureOrder = function cancelFutureOrder(callback, symbol, 
         symbol: symbol,
         order_id: order_id
     };
-    this.privateRequest('cancel_order', handleContractType(params, contract_type), callback);
+    this.privateRequest('future_cancel', handleContractType(params, contract_type), callback);
 };
 
 //7.获取合约订单信息
